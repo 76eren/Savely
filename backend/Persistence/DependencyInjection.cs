@@ -29,6 +29,9 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IGameCollectionRepository, GameCollectionRepository>();
+        services.AddScoped<IGameProfileRepository, GameProfileRepository>();
+        services.AddScoped<IGameSaveRepository, GameSaveRepository>();
 
         return services;
     }

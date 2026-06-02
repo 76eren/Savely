@@ -8,6 +8,9 @@ public class User
     public string Bio { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string PasswordHash { get; private set; } = default!;
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
+    public ICollection<GameCollection> Collections { get; private set; } = new List<GameCollection>();
     
     // TODO: Add profile picture later when min/io has been implemented
 
@@ -19,6 +22,8 @@ public class User
         string passwordHash
     )
     {
+        var now = DateTime.UtcNow;
+
         return new User
         {
             Id = Guid.NewGuid(),
@@ -26,7 +31,9 @@ public class User
             UserName = userName,
             Bio = bio,
             Email = email,
-            PasswordHash = passwordHash
+            PasswordHash = passwordHash,
+            CreatedAt = now,
+            UpdatedAt = now
         };
     }
     
