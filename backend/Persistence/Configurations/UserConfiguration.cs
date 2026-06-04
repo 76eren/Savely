@@ -10,7 +10,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(user => user.Id);
         builder.Property(user => user.Id)
-            .HasMaxLength(36)
+            .HasColumnType("uuid")
             .IsRequired();
 
         builder.Property(user => user.UserHandle)
@@ -29,8 +29,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(user => user.PasswordHash)
-            .HasMaxLength(512)
-            .IsRequired();
+            .HasMaxLength(512);
 
         builder.Property(user => user.CreatedAt)
             .IsRequired();
@@ -39,4 +38,3 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
     }
 }
-
