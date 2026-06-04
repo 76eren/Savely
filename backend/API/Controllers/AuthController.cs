@@ -1,7 +1,10 @@
 using System.Security.Claims;
 using API.Contracts.Auth;
 using Application.Auth.DTOs;
-using Application.Auth.Interfaces;
+using Application.CQRS.Auth.Commands;
+using Application.CQRS.Auth.Queries;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +12,13 @@ namespace API.Controllers;
 
 public sealed class AuthController : BaseApiController
 {
-    private readonly IAuthService _authService;
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IMediator mediator, IMapper mapper)
     {
-        _authService = authService;
+        _mediator = mediator;
+        _mapper = mapper;
     }
 
     [AllowAnonymous]
@@ -23,8 +28,8 @@ public sealed class AuthController : BaseApiController
         RegisterRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _authService.RegisterAsync(
-            new RegisterDto(request.UserHandle, request.UserName, request.Email, request.Password),
+        var result = await _mediator.Send(
+            new RegisterCommand(new RegisterDto(request.UserHandle, request.UserName, request.Email, request.Password)),
             cancellationToken);
 
         return MapResult(result);
@@ -37,8 +42,8 @@ public sealed class AuthController : BaseApiController
         LoginRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _authService.LoginAsync(
-            new LoginDto(request.UserHandle, request.Password),
+        var result = await _mediator.Send(
+            new LoginCommand(new LoginDto(request.UserHandle, request.Password)),
             cancellationToken);
 
         return MapResult(result);
@@ -51,8 +56,8 @@ public sealed class AuthController : BaseApiController
         RefreshRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _authService.RefreshAsync(
-            new RefreshDto(request.RefreshToken),
+        var result = await _mediator.Send(
+            new RefreshCommand(new RefreshDto(request.RefreshToken)),
             cancellationToken);
 
         return MapResult(result);
@@ -65,8 +70,8 @@ public sealed class AuthController : BaseApiController
         LogoutRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _authService.LogoutAsync(
-            new RefreshDto(request.RefreshToken),
+        var result = await _mediator.Send(
+            new LogoutCommand(new RefreshDto(request.RefreshToken)),
             cancellationToken);
 
         if (!result.Succeeded)
@@ -79,28 +84,22 @@ public sealed class AuthController : BaseApiController
 
     [Authorize]
     [HttpGet("me")]
-    [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<MeResponse>> Me(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<UserResponse>> Me(CancellationToken cancellationToken)
     {
         var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdValue, out var userId))
         {
-            return UnauthorizedProblem<MeResponse>();
+            return UnauthorizedProblem<UserResponse>();
         }
 
-        var me = await _authService.GetMeAsync(userId, cancellationToken);
+        var me = await _mediator.Send(new GetMeQuery(userId), cancellationToken);
         if (me is null)
         {
-            return NotFoundProblem<MeResponse>("User not found", "The current user no longer exists.");
+            return NotFoundProblem<UserResponse>("User not found", "The current user no longer exists.");
         }
 
-        return Ok(new MeResponse(
-            me.Id,
-            me.UserHandle,
-            me.UserName,
-            me.Email,
-            me.CreatedAt,
-            me.UpdatedAt));
+        return Ok(_mapper.Map<UserResponse>(me));
     }
 
     private ActionResult<AuthResponse> MapResult(AuthResult result)
@@ -110,11 +109,7 @@ public sealed class AuthController : BaseApiController
             return MapFailure(result);
         }
 
-        var response = new AuthResponse(
-            result.Tokens.AccessToken,
-            result.Tokens.AccessTokenExpiresAt,
-            result.Tokens.RefreshToken);
-
+        var response = _mapper.Map<AuthResponse>(result.Tokens);
         return Ok(response);
     }
 

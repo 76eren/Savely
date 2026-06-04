@@ -1,6 +1,6 @@
 namespace API.Contracts.Auth;
 
-public sealed record MeResponse(
+public sealed record UserResponse(
     Guid Id,
     string UserHandle,
     string UserName,

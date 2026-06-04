@@ -1,6 +1,7 @@
 using Application.Auth.DTOs;
 using Application.Auth.Interfaces;
 using Application.Auth.Options;
+using AutoMapper;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,17 +21,20 @@ public sealed class AuthService : IAuthService
     private readonly UserManager<User> _userManager;
     private readonly ITokenService _tokenService;
     private readonly JwtOptions _options;
+    private readonly IMapper _mapper;
 
     public AuthService(
         AppDbContext dbContext,
         UserManager<User> userManager,
         ITokenService tokenService,
-        IOptions<JwtOptions> options)
+        IOptions<JwtOptions> options,
+        IMapper mapper)
     {
         _dbContext = dbContext;
         _userManager = userManager;
         _tokenService = tokenService;
         _options = options.Value;
+        _mapper = mapper;
     }
 
     public async Task<AuthResult> RegisterAsync(RegisterDto dto, CancellationToken cancellationToken = default)
@@ -123,13 +127,7 @@ public sealed class AuthService : IAuthService
             return null;
         }
 
-        return new UserDto(
-            user.Id,
-            user.UserHandle,
-            user.UserName ?? string.Empty,
-            user.Email ?? string.Empty,
-            user.CreatedAt,
-            user.UpdatedAt);
+        return _mapper.Map<UserDto>(user);
     }
 
     private async Task<AuthResult> IssueTokensAsync(User user, CancellationToken cancellationToken)
