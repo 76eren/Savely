@@ -31,7 +31,7 @@ namespace Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserHandle = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    DisplayName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
@@ -276,12 +276,6 @@ namespace Persistence.Migrations
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_UserHandle",
-                table: "AspNetUsers",
-                column: "UserHandle",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",

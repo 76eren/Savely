@@ -13,14 +13,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("uuid")
             .IsRequired();
 
-        builder.Property(user => user.UserHandle)
-            .HasMaxLength(50)
+        builder.Property(user => user.UserName)
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.HasIndex(user => user.UserHandle)
-            .IsUnique();
-
-        builder.Property(user => user.UserName)
+        builder.Property(user => user.DisplayName)
             .HasMaxLength(100)
             .IsRequired();
 

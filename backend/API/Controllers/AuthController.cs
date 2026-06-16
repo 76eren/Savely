@@ -36,7 +36,7 @@ public sealed class AuthController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new RegisterCommand(new RegisterDto(request.UserHandle, request.UserName, request.Email, request.Password)),
+            new RegisterCommand(new RegisterDto(request.UserName, request.DisplayName, request.Email, request.Password)),
             cancellationToken);
 
         return MapResult(result);
@@ -50,7 +50,7 @@ public sealed class AuthController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new LoginCommand(new LoginDto(request.UserHandle, request.Password)),
+            new LoginCommand(new LoginDto(request.UserName, request.Password)),
             cancellationToken);
 
         return MapResult(result);
@@ -139,7 +139,7 @@ public sealed class AuthController : BaseApiController
     {
         return result.ErrorCode switch
         {
-            "duplicate_handle" => ConflictProblem<AuthResponse>("User handle already exists", result.ErrorDescription ?? string.Empty),
+            "duplicate_username" => ConflictProblem<AuthResponse>("Username already exists", result.ErrorDescription ?? string.Empty),
             "duplicate_email" => ConflictProblem<AuthResponse>("Email already exists", result.ErrorDescription ?? string.Empty),
             "invalid_credentials" => UnauthorizedProblem<AuthResponse>("Invalid credentials", result.ErrorDescription ?? string.Empty),
             "invalid_refresh_token" => UnauthorizedProblem<AuthResponse>("Invalid refresh token", result.ErrorDescription ?? string.Empty),

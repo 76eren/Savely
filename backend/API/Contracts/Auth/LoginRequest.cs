@@ -1,4 +1,4 @@
 namespace API.Contracts.Auth;
 
-public sealed record LoginRequest(string UserHandle, string Password);
+public sealed record LoginRequest(string UserName, string Password);
 

@@ -11,7 +11,7 @@ namespace Persistence.Authentication;
 
 public sealed class AuthService : IAuthService
 {
-    private const string DuplicateHandle = "duplicate_handle";
+    private const string DuplicateUserName = "duplicate_username";
     private const string DuplicateEmail = "duplicate_email";
     private const string InvalidCredentials = "invalid_credentials";
     private const string InvalidRefreshToken = "invalid_refresh_token";
@@ -39,9 +39,10 @@ public sealed class AuthService : IAuthService
 
     public async Task<AuthResult> RegisterAsync(RegisterDto dto, CancellationToken cancellationToken = default)
     {
-        if (await _userManager.Users.AnyAsync(user => user.UserHandle == dto.UserHandle, cancellationToken))
+        var normalizedUserName = _userManager.NormalizeName(dto.UserName);
+        if (await _userManager.Users.AnyAsync(user => user.NormalizedUserName == normalizedUserName, cancellationToken))
         {
-            return AuthResult.Failure(DuplicateHandle, "User handle is already taken.");
+            return AuthResult.Failure(DuplicateUserName, "Username is already taken.");
         }
 
         if (await _userManager.Users.AnyAsync(user => user.Email == dto.Email, cancellationToken))
@@ -49,7 +50,7 @@ public sealed class AuthService : IAuthService
             return AuthResult.Failure(DuplicateEmail, "Email is already registered.");
         }
 
-        var user = User.Create(dto.UserHandle, dto.UserName, dto.Email);
+        var user = User.Create(dto.UserName, dto.DisplayName, dto.Email);
         var result = await _userManager.CreateAsync(user, dto.Password);
 
         if (!result.Succeeded)
@@ -63,19 +64,20 @@ public sealed class AuthService : IAuthService
 
     public async Task<AuthResult> LoginAsync(LoginDto dto, CancellationToken cancellationToken = default)
     {
+        var normalizedUserName = _userManager.NormalizeName(dto.UserName);
         var user = await _userManager.Users.FirstOrDefaultAsync(
-            u => u.UserHandle == dto.UserHandle,
+            u => u.NormalizedUserName == normalizedUserName,
             cancellationToken);
 
         if (user is null)
         {
-            return AuthResult.Failure(InvalidCredentials, "Invalid user handle or password.");
+            return AuthResult.Failure(InvalidCredentials, "Invalid username or password.");
         }
 
         var isValid = await _userManager.CheckPasswordAsync(user, dto.Password);
         if (!isValid)
         {
-            return AuthResult.Failure(InvalidCredentials, "Invalid user handle or password.");
+            return AuthResult.Failure(InvalidCredentials, "Invalid username or password.");
         }
 
         return await IssueTokensAsync(user, cancellationToken);

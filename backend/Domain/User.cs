@@ -4,7 +4,7 @@ namespace Domain;
 
 public class User : IdentityUser<Guid>
 {
-    public string UserHandle { get; private set; } = default!; // This is the @username, and must be unique
+    public string DisplayName { get; private set; } = default!;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public ICollection<GameCollection> Collections { get; private set; } = new List<GameCollection>();
@@ -13,8 +13,8 @@ public class User : IdentityUser<Guid>
     // TODO: Add profile picture later when min/io has been implemented
 
     public static User Create(
-        string userHandle,
         string userName,
+        string displayName,
         string email)
     {
         var now = DateTime.UtcNow;
@@ -22,8 +22,8 @@ public class User : IdentityUser<Guid>
         return new User
         {
             Id = Guid.NewGuid(),
-            UserHandle = userHandle,
             UserName = userName,
+            DisplayName = displayName,
             Email = email,
             CreatedAt = now,
             UpdatedAt = now,
