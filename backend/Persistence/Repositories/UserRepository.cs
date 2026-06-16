@@ -34,9 +34,9 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
-    public Task<User?> GetByHandleAsync(string handle, CancellationToken cancellationToken = default)
+    public Task<User?> GetByUserNameAsync(string userName, CancellationToken cancellationToken = default)
     {
-        return _dbContext.Users.FirstOrDefaultAsync(user => user.UserHandle == handle, cancellationToken);
+        return _dbContext.Users.FirstOrDefaultAsync(user => user.UserName == userName, cancellationToken);
     }
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)

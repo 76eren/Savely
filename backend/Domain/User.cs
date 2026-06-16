@@ -1,37 +1,33 @@
-﻿namespace Domain;
+﻿using Microsoft.AspNetCore.Identity;
 
-public class User
+namespace Domain;
+
+public class User : IdentityUser<Guid>
 {
-    public Guid Id { get; private set; } = default!;
-    public string UserHandle { get; private set; } = default!; // This is the @username, and must be unique
-    public string UserName { get; private set; } = default!;
-    public string Email { get; private set; } = default!;
-    public string PasswordHash { get; private set; } = default!;
+    public string DisplayName { get; private set; } = default!;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public ICollection<GameCollection> Collections { get; private set; } = new List<GameCollection>();
-    
+    public ICollection<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
+
     // TODO: Add profile picture later when min/io has been implemented
 
     public static User Create(
-        string userHandle,
         string userName,
-        string email,
-        string passwordHash
-    )
+        string displayName,
+        string email)
     {
         var now = DateTime.UtcNow;
 
         return new User
         {
             Id = Guid.NewGuid(),
-            UserHandle = userHandle,
             UserName = userName,
+            DisplayName = displayName,
             Email = email,
-            PasswordHash = passwordHash,
             CreatedAt = now,
-            UpdatedAt = now
+            UpdatedAt = now,
+            SecurityStamp = Guid.NewGuid().ToString()
         };
     }
-    
 }
