@@ -1,0 +1,38 @@
+<app-auth-shell titleId="login-title">
+  <header class="relative mb-[38px]">
+    <span class="absolute -top-[18px] -left-5 hidden size-[15px] border-t-2 border-l-2 border-[#0aa9aa] sm:block" aria-hidden="true"></span>
+    <span class="absolute -top-[18px] -right-1 hidden size-[15px] border-t-2 border-r-2 border-[#0aa9aa] sm:block" aria-hidden="true"></span>
+    <h1 id="login-title" class="mb-2.5 text-[clamp(1.875rem,3vw,2.5rem)] leading-[1.08] font-bold tracking-[-0.045em] text-white">Sign in to Savely</h1>
+  </header>
+
+  <form class="space-y-5" (submit)="$event.preventDefault()">
+    <app-auth-field
+      id="username"
+      label="Username"
+      name="username"
+      autocomplete="username"
+      placeholder="Kingjulian22"
+      [(value)]="username"
+    />
+
+    <app-auth-field
+      id="password"
+      label="Password"
+      name="password"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Enter your password"
+      [showForgotPassword]="true"
+      [(value)]="password"
+    />
+
+    <button
+      (click)="this.signIn()"
+      class="mt-[30px] min-h-[54px] w-full cursor-pointer rounded-full border-0 bg-[#0aa9aa] text-[13px] font-extrabold tracking-[0.06em] text-white uppercase transition-colors hover:bg-[#0b9899]" type="submit">Sign in</button>
+  </form>
+
+  <p class="mt-6 text-center text-[13px] text-[#7e898e]">
+    New to Savely?
+    <a class="text-xs font-semibold text-[#0aa9aa] no-underline hover:underline" routerLink="/register">Create an account</a>
+  </p>
+</app-auth-shell>
